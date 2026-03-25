@@ -1,0 +1,131 @@
+# registry/benchmark_holdout.yaml
+# These datasets are PURE EVALUATION benchmarks.
+# They MUST NOT appear in any training JSONL.
+# Every builder checks against this before ingesting data.
+
+benchmarks:
+  - name: TempCompass
+    purpose: "Temporal comprehension evaluation"
+    note: "No train split; eval-only benchmark"
+
+  - name: TemporalBench
+    purpose: "Fine-grained temporal understanding evaluation"
+    note: "~10k QA pairs; eval-only"
+
+  - name: MVBench
+    purpose: "Multi-modal video understanding benchmark"
+    note: "20 temporal understanding tasks; eval-only"
+
+  - name: MLVU
+    purpose: "Multi-task long video understanding evaluation"
+    note: "3min-2hr videos; eval-only"
+
+  - name: LongVideoBench
+    purpose: "Long-context video-language QA evaluation"
+    note: "3,763 videos, 6,678 questions; eval-only"
+
+  - name: Video-MME
+    purpose: "Video multi-modal evaluation benchmark"
+    note: "11s-1hr videos; eval-only"
+
+  - name: EgoSchema
+    purpose: "Egocentric long-form video QA evaluation"
+    note: "5000+ MCQ pairs from Ego4D; eval-only"
+
+  - name: PerceptionTest
+    purpose: "Multimodal perception and reasoning evaluation"
+    note: "11.6k videos; eval-only"
+
+  - name: Video-MMMU
+    purpose: "Video multi-discipline knowledge evaluation"
+    note: "300 lecture videos across 30 subjects; eval-only"
+
+  - name: VSI-Bench
+    purpose: "Video spatial intelligence evaluation"
+    note: "5000+ QA pairs; eval-only"
+
+  - name: EgoIntent
+    purpose: "Egocentric intent prediction evaluation"
+    note: "3,014 steps across 15 scenarios; eval-only"
+
+  - name: TutorialVQA
+    purpose: "Tutorial video QA evaluation"
+    note: "~6k QA triples; eval-only"
+
+# Datasets with train/test splits - ONLY train split is allowed
+split_restricted:
+  - name: NExT-QA
+    allowed_splits: ["train", "val"]
+    forbidden_splits: ["test"]
+
+  - name: STAR
+    allowed_splits: ["train", "val"]
+    forbidden_splits: ["test"]
+
+  - name: CLEVRER
+    allowed_splits: ["train", "val"]
+    forbidden_splits: ["test"]
+
+  - name: QVHighlights
+    allowed_splits: ["train", "val"]
+    forbidden_splits: ["test"]
+
+  - name: TVQA
+    allowed_splits: ["train", "val"]
+    forbidden_splits: ["test"]
+
+  - name: ActivityNet Captions
+    allowed_splits: ["train", "val_1", "val_2"]
+    forbidden_splits: ["test"]
+
+  - name: Ego4D
+    allowed_splits: ["train", "val"]
+    forbidden_splits: ["test"]
+
+  - name: VLEP
+    allowed_splits: ["train", "val"]
+    forbidden_splits: ["test"]
+
+  - name: AGQA
+    allowed_splits: ["train", "val"]
+    forbidden_splits: ["test"]
+
+  - name: ANetQA
+    allowed_splits: ["train", "val"]
+    forbidden_splits: ["test"]
+
+  - name: COIN
+    allowed_splits: ["train"]
+    forbidden_splits: ["test"]
+
+  - name: CrossTask
+    allowed_splits: ["train"]
+    forbidden_splits: ["test"]
+
+  - name: Assembly101
+    allowed_splits: ["train", "val"]
+    forbidden_splits: ["test"]
+
+  - name: Something-Something V2
+    allowed_splits: ["train", "val"]
+    forbidden_splits: ["test"]
+
+  - name: FineGym
+    allowed_splits: ["train"]
+    forbidden_splits: ["test"]
+
+  - name: AVQA
+    allowed_splits: ["train", "val"]
+    forbidden_splits: ["test"]
+
+  - name: MUSIC-AVQA
+    allowed_splits: ["train", "val"]
+    forbidden_splits: ["test"]
+
+  - name: YouCook2
+    allowed_splits: ["train", "val"]
+    forbidden_splits: ["test"]
+
+  - name: EPIC-KITCHENS
+    allowed_splits: ["train", "val"]
+    forbidden_splits: ["test"]

@@ -1,0 +1,142 @@
+# registry/capability_map.yaml
+# Maps each sub-capability to its dataset sources (ordered by priority)
+
+capabilities:
+  temporal_atomic:
+    ability_label: "Temporal"
+    sub_abilities: ["event_order", "before_after", "speed", "direction", "attribute_change", "action_phase"]
+    sources:
+      priority_1:
+        - video_r1     # RL-native, has temporal samples from CLEVRER/STAR/NExT-QA
+      priority_2:
+        - ssv2         # Something-Something V2 train
+        - finegym      # FineGym train
+      priority_3:
+        - diving48
+        - jester
+
+  temporal_count_order:
+    ability_label: "Temporal"
+    sub_abilities: ["action_count", "action_order", "repeated_events", "step_indexing"]
+    sources:
+      priority_1:
+        - video_r1
+      priority_2:
+        - finegym
+        - coin
+        - crosstask
+        - assembly101
+      priority_3:
+        - finediving
+
+  temporal_grounding:
+    ability_label: "Temporal"
+    sub_abilities: ["moment_retrieval", "support_span_localization", "highlight_detection"]
+    sources:
+      priority_1:
+        - qvhighlights
+        - activitynet_captions
+      priority_2:
+        - youcook2
+      priority_3:
+        - tacos
+        - charades_sta
+
+  long_video_retrieval_memory:
+    ability_label: "Memory"
+    sub_abilities: ["referred_reasoning", "needle_retrieval", "long_context_memory", "subtitle_grounded_lookup"]
+    sources:
+      priority_1:
+        - tvqa
+        - ego4d
+        - activitynet_captions
+      priority_2: []
+      priority_3: []
+
+  causal_relation_reasoning:
+    ability_label: "Causal"
+    sub_abilities: ["causal_why_how", "feasibility", "interaction_logic", "temporal_relation"]
+    sources:
+      priority_1:
+        - nextqa
+        - star
+        - clevrer
+      priority_2:
+        - agqa
+        - anetqa
+      priority_3: []
+
+  future_event_counterfactual:
+    ability_label: "Prediction"
+    sub_abilities: ["what_happens_next", "future_event_summary", "anticipation", "counterfactual_outcome"]
+    sources:
+      priority_1:
+        - nep_v1       # RL-native
+        - star
+        - clevrer
+      priority_2:
+        - vlep
+        - ego4d        # forecasting subsets
+      priority_3: []
+
+  egocentric_intent_next_step:
+    ability_label: "Egocentric"
+    sub_abilities: ["current_step_intent", "higher_level_goal", "next_step_planning", "procedural_anticipation"]
+    sources:
+      priority_1:
+        - ego4d
+      priority_2:
+        - epic_kitchens
+        - assembly101
+        - coin
+        - crosstask
+      priority_3: []
+
+  spatial_spatiotemporal_reasoning:
+    ability_label: "Spatial"
+    sub_abilities: ["relative_position", "motion_in_space", "object_person_relation", "topological_change"]
+    sources:
+      priority_1:
+        - spacer       # RL-native
+        - clevrer
+      priority_2:
+        - agqa
+        - action_genome
+      priority_3:
+        - ego_exo4d
+
+  multimodal_av_fusion:
+    ability_label: "AV-Fusion"
+    sub_abilities: ["sound_source_alignment", "subtitle_audio_video_fusion", "cross_modal_disambiguation"]
+    sources:
+      priority_1:
+        - ego4d        # audio subsets
+      priority_2:
+        - avqa
+        - music_avqa
+      priority_3:
+        - avsd
+
+  topic_plot_knowledge_acquisition:
+    ability_label: "Knowledge"
+    sub_abilities: ["tutorial_topic_understanding", "plot_theme", "knowledge_acquisition", "adaptation_after_watching"]
+    sources:
+      priority_1:
+        - tvqa
+        - activitynet_captions
+      priority_2:
+        - youcook2
+        - coin
+      priority_3: []
+
+  anti_shortcut_contrast:
+    ability_label: "Robustness"
+    sub_abilities: ["reverse_order", "shuffle_segments", "speed_change", "subtitle_drop", "audio_drop", "last_frame_only", "sparse_frame_ablation"]
+    sources:
+      priority_1:
+        - video_r1     # RL-native
+        - spacer       # RL-native
+        - clevrer
+      pair_constructors:
+        - tpo_pairs    # Build from training data
+        - tempo_pairs  # Build from training data

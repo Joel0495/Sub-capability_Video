@@ -1,0 +1,75 @@
+# configs/download_config.yaml
+# Central configuration for the download pipeline
+
+download:
+  # Path to the HuggingFace download script
+  hf_dl_script: "/root/data/home/zhangyuxiang/utils/dl_hf/hf_dl.sh"
+
+  # Browser executable for hf_dl.sh
+  browser_executable_path: "/root/data/home/zhangyuxiang/utils/dl_hf/chrome-linux/chrome"
+
+  # Concurrency for scraping
+  scrape_concurrency: 4
+
+  # Base directory for all raw data downloads
+  data_root: "data/raw"
+
+# HuggingFace hosted datasets
+hf_datasets:
+  video_r1:
+    repo_id: "Video-R1/Video-R1-data"
+    type: "dataset"
+    note: "RL-native, 260k samples (video + image)"
+
+  spacer:
+    repo_id: "RUBBISHLIKE/SpaceR-151k"
+    type: "dataset"
+    note: "Spatial RL, 91k spatial + 60k general"
+
+  nep_v1:
+    repo_id: "haonan3/V1-33K"
+    type: "dataset"
+    note: "Next-event prediction, 33k pairs"
+
+  nextqa:
+    repo_id: "lmms-lab/NExT-QA"
+    type: "dataset"
+    note: "Causal video QA, ~35k train"
+
+  star:
+    repo_id: "STAR-Benchmark/STAR"
+    type: "dataset"
+    note: "Situated reasoning, ~45k train"
+
+  clevrer:
+    repo_id: "dali-does/CLEVRER"
+    type: "dataset"
+    note: "Synthetic reasoning, ~20k train"
+
+  qvhighlights:
+    repo_id: "jayleicn/QVHighlights"
+    type: "dataset"
+    note: "Moment retrieval, ~10k train"
+
+  tvqa:
+    repo_id: "lmms-lab/TVQA"
+    type: "dataset"
+    note: "TV show QA, ~120k train"
+
+  activitynet_captions:
+    repo_id: "HuggingFaceM4/ActivityNet-Captions"
+    type: "dataset"
+    note: "Activity captioning, ~37k train"
+
+# Non-HuggingFace datasets (require manual download)
+manual_datasets:
+  ego4d:
+    source_url: "https://ego4d-data.org/"
+    license: "Ego4D License Agreement"
+    instructions: |
+      1. Visit https://ego4d-data.org/ and create an account
+      2. Accept the license agreement
+      3. Use the Ego4D CLI to download:
+         python -m ego4d.cli.cli --output_directory data/raw/ego4d --datasets full_scale
+      4. Download annotations separately from the benchmark page
+    note: "Egocentric video, ~50k+ train samples"

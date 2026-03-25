@@ -1,0 +1,18 @@
+[project]
+name = "video-rl-dataset-builder"
+version = "0.1.0"
+description = "Unified Video RL/RLVR dataset builder for 11 sub-capabilities"
+requires-python = ">=3.10"
+dependencies = [
+    "pydantic>=2.0",
+    "orjsonl>=1.0",
+    "pyyaml>=6.0",
+    "fire>=0.5",
+    "tqdm>=4.60",
+]
+
+[project.optional-dependencies]
+dev = [
+    "pytest>=7.0",
+    "pytest-cov>=4.0",
+]

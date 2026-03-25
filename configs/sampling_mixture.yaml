@@ -1,0 +1,72 @@
+# configs/sampling_mixture.yaml
+# Steady-state sampling ratios (sum = 100) and curriculum schedule
+
+steady_state:
+  temporal_atomic: 14
+  temporal_count_order: 9
+  temporal_grounding: 11
+  long_video_retrieval_memory: 11
+  causal_relation_reasoning: 9
+  future_event_counterfactual: 10
+  egocentric_intent_next_step: 8
+  spatial_spatiotemporal_reasoning: 10
+  multimodal_av_fusion: 6
+  topic_plot_knowledge_acquisition: 6
+  anti_shortcut_contrast: 6
+
+# Curriculum schedule: how to transition from warmup to full mixture
+curriculum:
+  # First 20% of training steps
+  warmup:
+    range_pct: [0, 20]
+    overweight:
+      - temporal_atomic
+      - temporal_count_order
+      - anti_shortcut_contrast
+    multiplier: 1.5  # 1.5x steady-state weight for these buckets
+
+  # Middle 50% of training steps
+  main:
+    range_pct: [20, 70]
+    overweight:
+      - temporal_grounding
+      - long_video_retrieval_memory
+      - causal_relation_reasoning
+      - future_event_counterfactual
+    multiplier: 1.3
+
+  # Final 30% of training steps
+  refinement:
+    range_pct: [70, 100]
+    overweight:
+      - multimodal_av_fusion
+      - topic_plot_knowledge_acquisition
+    multiplier: 1.5
+
+# Per-capability quotas for the final dataset
+quotas:
+  canonical:
+    temporal_atomic: 25000
+    temporal_count_order: 20000
+    temporal_grounding: 15000
+    long_video_retrieval_memory: 20000
+    causal_relation_reasoning: 25000
+    future_event_counterfactual: 18000
+    egocentric_intent_next_step: 18000
+    spatial_spatiotemporal_reasoning: 20000
+    multimodal_av_fusion: 10000
+    topic_plot_knowledge_acquisition: 15000
+    anti_shortcut_contrast: 14000
+
+  rl_ready:
+    temporal_atomic: 10000
+    temporal_count_order: 8000
+    temporal_grounding: 6000
+    long_video_retrieval_memory: 8000
+    causal_relation_reasoning: 10000
+    future_event_counterfactual: 7000
+    egocentric_intent_next_step: 7000
+    spatial_spatiotemporal_reasoning: 8000
+    multimodal_av_fusion: 4000
+    topic_plot_knowledge_acquisition: 6000
+    anti_shortcut_contrast: 6000

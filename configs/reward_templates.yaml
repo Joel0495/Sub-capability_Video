@@ -1,0 +1,89 @@
+# configs/reward_templates.yaml
+# 11 unified reward templates, one per sub-capability
+
+templates:
+  temporal_atomic_v1:
+    weights:
+      ans: 0.7
+      temporal: 0.2
+      format: 0.1
+    formula: "R = 0.7*ans + 0.2*temporal + 0.1*format"
+
+  count_order_v1:
+    weights:
+      ans: 0.6
+      order_or_count: 0.2
+      support: 0.1
+      format: 0.1
+    formula: "R = 0.6*ans + 0.2*order_or_count + 0.1*support + 0.1*format"
+
+  grounding_v1:
+    weights:
+      ans: 0.45
+      span_iou: 0.40
+      contrast: 0.10
+      format: 0.05
+    formula: "R = 0.45*ans + 0.40*span_iou + 0.10*contrast + 0.05*format"
+
+  long_retrieval_v1:
+    weights:
+      ans: 0.35
+      retrieval: 0.35
+      support: 0.20
+      efficiency: 0.10
+    formula: "R = 0.35*ans + 0.35*retrieval + 0.20*support + 0.10*efficiency"
+
+  causal_relation_v1:
+    weights:
+      ans: 0.6
+      logic: 0.2
+      support: 0.1
+      format: 0.1
+    formula: "R = 0.6*ans + 0.2*logic + 0.1*support + 0.1*format"
+
+  future_pred_v1:
+    weights:
+      ans: 0.5
+      future_slot: 0.2
+      contrast: 0.2
+      format: 0.1
+    formula: "R = 0.5*ans + 0.2*future_slot + 0.2*contrast + 0.1*format"
+
+  ego_intent_v1:
+    weights:
+      what: 0.35
+      why: 0.30
+      next: 0.25
+      format: 0.10
+    formula: "R = 0.35*what + 0.30*why + 0.25*next + 0.10*format"
+
+  spatial_video_v1:
+    weights:
+      ans: 0.5
+      spatial: 0.25
+      support: 0.15
+      format: 0.10
+    formula: "R = 0.5*ans + 0.25*spatial + 0.15*support + 0.10*format"
+
+  av_fusion_v1:
+    weights:
+      ans: 0.55
+      cross_modal: 0.20
+      ablation_consistency: 0.15
+      format: 0.10
+    formula: "R = 0.55*ans + 0.20*cross_modal + 0.15*ablation_consistency + 0.10*format"
+
+  knowledge_acq_v1:
+    weights:
+      ans: 0.5
+      support: 0.2
+      adaptation: 0.2
+      format: 0.1
+    formula: "R = 0.5*ans + 0.2*support + 0.2*adaptation + 0.1*format"
+
+  anti_shortcut_v1:
+    weights:
+      clean_ans: 0.45
+      perturbed_ans: 0.35
+      contrast_gap: 0.20
+    formula: "R = 0.45*clean_ans + 0.35*perturbed_ans + 0.20*contrast_gap"

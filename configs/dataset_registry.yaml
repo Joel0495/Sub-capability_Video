@@ -1,0 +1,213 @@
+# configs/dataset_registry.yaml
+# Master catalog of all datasets: source, HF repo, license, capabilities served
+
+datasets:
+  # ─── RL-native datasets ──────────────────────────────────────────────────
+  video_r1:
+    display_name: "Video-R1-260k"
+    hf_repo: "Video-R1/Video-R1-data"
+    layer: "A"  # RL-native
+    size_est: 260000
+    license: "Apache-2.0"
+    capabilities:
+      - temporal_atomic
+      - temporal_count_order
+      - anti_shortcut_contrast
+    notes: "Contains CLEVRER, NExT-QA, STAR, PerceptionTest, LLaVA-Video subsets"
+
+  spacer:
+    display_name: "SpaceR-151k"
+    hf_repo: "RUBBISHLIKE/SpaceR-151k"
+    layer: "A"
+    size_est: 151000
+    license: "MIT"
+    capabilities:
+      - spatial_spatiotemporal_reasoning
+      - anti_shortcut_contrast
+    notes: "91k spatial (ScanNet) + 60k general from Video-R1"
+
+  nep_v1:
+    display_name: "NEP V1-33K"
+    hf_repo: "haonan3/V1-33K"
+    layer: "A"
+    size_est: 33000
+    license: "MIT"
+    capabilities:
+      - future_event_counterfactual
+    notes: "Next-event prediction pairs"
+
+  # ─── Priority-1 trainable datasets ───────────────────────────────────────
+  nextqa:
+    display_name: "NExT-QA"
+    hf_repo: "lmms-lab/NExT-QA"
+    layer: "C"  # Benchmark-to-RLVR converted
+    size_est: 35000
+    license: "BSD"
+    allowed_splits: ["train", "val"]
+    capabilities:
+      - causal_relation_reasoning
+    notes: "Multi-event causal video QA"
+
+  star:
+    display_name: "STAR"
+    hf_repo: "STAR-Benchmark/STAR"
+    layer: "C"
+    size_est: 45000
+    license: "MIT"
+    allowed_splits: ["train", "val"]
+    capabilities:
+      - causal_relation_reasoning
+      - future_event_counterfactual
+    notes: "Situated reasoning with temporal focus"
+
+  clevrer:
+    display_name: "CLEVRER"
+    hf_repo: "dali-does/CLEVRER"
+    layer: "C"
+    size_est: 20000
+    license: "MIT"
+    allowed_splits: ["train", "val"]
+    capabilities:
+      - causal_relation_reasoning
+      - future_event_counterfactual
+      - spatial_spatiotemporal_reasoning
+      - anti_shortcut_contrast
+    notes: "Synthetic video reasoning"
+
+  qvhighlights:
+    display_name: "QVHighlights"
+    hf_repo: "jayleicn/QVHighlights"
+    layer: "C"
+    size_est: 10000
+    license: "MIT"
+    allowed_splits: ["train", "val"]
+    capabilities:
+      - temporal_grounding
+    notes: "Moment retrieval + highlight detection"
+
+  tvqa:
+    display_name: "TVQA"
+    hf_repo: "lmms-lab/TVQA"
+    layer: "C"
+    size_est: 120000
+    license: "MIT"
+    allowed_splits: ["train", "val"]
+    capabilities:
+      - long_video_retrieval_memory
+      - topic_plot_knowledge_acquisition
+    notes: "TV show video QA, 152.5K pairs"
+
+  activitynet_captions:
+    display_name: "ActivityNet Captions"
+    hf_repo: "HuggingFaceM4/ActivityNet-Captions"
+    layer: "C"
+    size_est: 37000
+    license: "MIT"
+    allowed_splits: ["train", "val_1", "val_2"]
+    capabilities:
+      - temporal_grounding
+      - long_video_retrieval_memory
+      - topic_plot_knowledge_acquisition
+    notes: "Activity captioning with temporal annotations"
+
+  ego4d:
+    display_name: "Ego4D"
+    source: "manual"
+    source_url: "https://ego4d-data.org/"
+    layer: "C"
+    size_est: 50000
+    license: "Ego4D License"
+    allowed_splits: ["train", "val"]
+    capabilities:
+      - long_video_retrieval_memory
+      - future_event_counterfactual
+      - egocentric_intent_next_step
+      - multimodal_av_fusion
+    notes: "3670 hours egocentric video, requires license agreement"
+
+  # ─── Priority-2 datasets (to be implemented later) ──────────────────────
+  vlep:
+    display_name: "VLEP"
+    hf_repo: "TBD"
+    layer: "C"
+    size_est: 20000
+    capabilities: [future_event_counterfactual]
+
+  agqa:
+    display_name: "AGQA"
+    hf_repo: "TBD"
+    layer: "C"
+    size_est: 150000
+    capabilities: [causal_relation_reasoning, spatial_spatiotemporal_reasoning]
+
+  anetqa:
+    display_name: "ANetQA"
+    hf_repo: "TBD"
+    layer: "C"
+    size_est: 38000
+    capabilities: [causal_relation_reasoning]
+
+  coin:
+    display_name: "COIN"
+    hf_repo: "TBD"
+    layer: "C"
+    size_est: 9000
+    capabilities: [temporal_count_order, egocentric_intent_next_step, topic_plot_knowledge_acquisition]
+
+  crosstask:
+    display_name: "CrossTask"
+    hf_repo: "TBD"
+    layer: "C"
+    size_est: 5000
+    capabilities: [temporal_count_order, egocentric_intent_next_step]
+
+  assembly101:
+    display_name: "Assembly101"
+    hf_repo: "TBD"
+    layer: "C"
+    size_est: 10000
+    capabilities: [temporal_count_order, egocentric_intent_next_step]
+
+  ssv2:
+    display_name: "Something-Something V2"
+    source: "manual"
+    source_url: "https://developer.qualcomm.com/software/ai-datasets/something-something"
+    layer: "C"
+    size_est: 170000
+    capabilities: [temporal_atomic]
+
+  finegym:
+    display_name: "FineGym"
+    hf_repo: "TBD"
+    layer: "C"
+    size_est: 26000
+    capabilities: [temporal_atomic, temporal_count_order]
+
+  avqa:
+    display_name: "AVQA"
+    hf_repo: "TBD"
+    layer: "C"
+    size_est: 57000
+    capabilities: [multimodal_av_fusion]
+
+  music_avqa:
+    display_name: "MUSIC-AVQA"
+    hf_repo: "TBD"
+    layer: "C"
+    size_est: 45000
+    capabilities: [multimodal_av_fusion]
+
+  youcook2:
+    display_name: "YouCook2"
+    hf_repo: "TBD"
+    layer: "C"
+    size_est: 10000
+    capabilities: [temporal_grounding, topic_plot_knowledge_acquisition]
+
+  epic_kitchens:
+    display_name: "EPIC-KITCHENS"
+    source: "manual"
+    source_url: "https://epic-kitchens.github.io/"
+    layer: "C"
+    size_est: 90000
+    capabilities: [egocentric_intent_next_step]

@@ -1,0 +1,29 @@
+# Data directories
+data/
+*.mp4
+*.avi
+*.mkv
+*.webm
+*.mov
+*.flv
+*.wmv
+
+# Python
+__pycache__/
+*.pyc
+*.pyo
+*.egg-info/
+dist/
+build/
+.eggs/
+
+# IDE
+.vscode/
+.idea/
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Downloads
+download_*.sh
