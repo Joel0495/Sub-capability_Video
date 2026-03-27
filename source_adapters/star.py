@@ -1,6 +1,6 @@
 """Source adapter for STAR (train split).
 
-HF repo: csbobby/STAR_Benchmark
+HF repo: N/A (GitHub only: csbobby/STAR_Benchmark)
 Situated reasoning in real-world videos, ~45k train samples.
 25% sequencing questions with temporal focus.
 """
@@ -26,7 +26,7 @@ from schema.canonical import (
 class STARAdapter(BaseAdapter):
     dataset_name = "star"
     display_name = "STAR"
-    hf_repo = "csbobby/STAR_Benchmark"
+    hf_repo = None  # Not on HuggingFace, use GitHub: csbobby/STAR_Benchmark
     license = "MIT"
     is_rl_native = False
 
@@ -38,11 +38,16 @@ class STARAdapter(BaseAdapter):
         "Feasibility": SubCapability.CAUSAL_RELATION_REASONING,
     }
 
-    def _post_download_commands(self) -> str:
+    def _generate_manual_download_instructions(self) -> str:
         return (
-            f"# STAR: situated reasoning annotations\n"
-            f"# Move JSON annotations to {self.ann_dir}/\n"
-            f"# Videos from Charades to {self.video_dir}/"
+            f"# === STAR ({self.dataset_name}) ===\n"
+            f"# MANUAL DOWNLOAD REQUIRED - GitHub only (not on HuggingFace)\n"
+            f"# 1. git clone https://github.com/csbobby/STAR_Benchmark.git /tmp/STAR_Benchmark\n"
+            f"# 2. Copy annotations:\n"
+            f"#    cp /tmp/STAR_Benchmark/Situation_Video_Train/*.json {self.ann_dir}/\n"
+            f"# 3. Download Charades videos from https://prior.allenai.org/projects/charades\n"
+            f"#    and place in {self.video_dir}/\n"
+            f"mkdir -p {self.video_dir} {self.ann_dir}\n"
         )
 
     def iterate_raw(self, split: str = "train") -> Iterator[dict]:

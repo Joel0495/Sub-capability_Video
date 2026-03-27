@@ -50,7 +50,8 @@ datasets:
 
   star:
     display_name: "STAR"
-    hf_repo: "csbobby/STAR_Benchmark"
+    source: "manual"
+    source_url: "https://github.com/csbobby/STAR_Benchmark"
     layer: "C"
     size_est: 45000
     license: "MIT"

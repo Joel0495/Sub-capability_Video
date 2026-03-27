@@ -39,7 +39,8 @@ hf_datasets:
   star:
     repo_id: "csbobby/STAR_Benchmark"
     type: "dataset"
-    note: "Situated reasoning, ~45k train (GitHub mirror on HF)"
+    note: "NOT on HuggingFace - GitHub only, manual download required"
+    manual: true
 
   clevrer:
     repo_id: "zechen-nlp/clevrer"
