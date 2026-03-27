@@ -4,14 +4,14 @@ from __future__ import annotations
 
 import json
 from pathlib import Path
-from typing import Iterator
+from typing import Iterator, List, Tuple, Union
 
 from pydantic import ValidationError
 
 from schema.canonical import CanonicalSample
 
 
-def validate_jsonl(path: str | Path) -> tuple[int, int, list[str]]:
+def validate_jsonl(path: Union[str, Path]) -> Tuple[int, int, List[str]]:
     """Validate a JSONL file against the canonical schema.
 
     Returns:
@@ -33,7 +33,7 @@ def validate_jsonl(path: str | Path) -> tuple[int, int, list[str]]:
     return valid, len(errors), errors
 
 
-def iterate_validated(path: str | Path) -> Iterator[CanonicalSample]:
+def iterate_validated(path: Union[str, Path]) -> Iterator[CanonicalSample]:
     """Iterate over a JSONL file, yielding validated CanonicalSample objects."""
     path = Path(path)
     for line in path.open():
@@ -44,7 +44,7 @@ def iterate_validated(path: str | Path) -> Iterator[CanonicalSample]:
         yield CanonicalSample.model_validate(data)
 
 
-def check_video_files_exist(path: str | Path) -> list[str]:
+def check_video_files_exist(path: Union[str, Path]) -> List[str]:
     """Check that all video_url references point to existing files."""
     missing = []
     for sample in iterate_validated(path):

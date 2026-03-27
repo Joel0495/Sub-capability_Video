@@ -1,6 +1,6 @@
 """Source adapter for TVQA (train split).
 
-HF repo: lmms-lab/TVQA
+HF repo: pengxiang/tvqa
 TV show QA, 152.5K QA pairs from 21.8K video clips.
 Shows: Friends, Big Bang Theory, How I Met Your Mother, etc.
 """
@@ -27,7 +27,7 @@ from schema.canonical import (
 class TVQAAdapter(BaseAdapter):
     dataset_name = "tvqa"
     display_name = "TVQA"
-    hf_repo = "lmms-lab/TVQA"
+    hf_repo = "pengxiang/tvqa"
     license = "MIT"
     is_rl_native = False
 

@@ -1,6 +1,6 @@
 """Source adapter for QVHighlights (train split).
 
-HF repo: jayleicn/QVHighlights
+HF repo: VLM2Vec/QVHighlight
 Moment retrieval + highlight detection, ~10k train samples.
 Each sample has natural language queries with temporal moment annotations.
 """
@@ -29,7 +29,7 @@ from schema.canonical import (
 class QVHighlightsAdapter(BaseAdapter):
     dataset_name = "qvhighlights"
     display_name = "QVHighlights"
-    hf_repo = "jayleicn/QVHighlights"
+    hf_repo = "VLM2Vec/QVHighlight"
     license = "MIT"
     is_rl_native = False
 

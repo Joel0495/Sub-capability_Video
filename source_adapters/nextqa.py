@@ -1,6 +1,6 @@
 """Source adapter for NExT-QA (train split).
 
-HF repo: lmms-lab/NExT-QA
+HF repo: lmms-lab/NExTQA
 Multi-event causal video QA, ~35k train samples.
 """
 
@@ -26,7 +26,7 @@ from schema.canonical import (
 class NExTQAAdapter(BaseAdapter):
     dataset_name = "nextqa"
     display_name = "NExT-QA"
-    hf_repo = "lmms-lab/NExT-QA"
+    hf_repo = "lmms-lab/NExTQA"
     license = "BSD"
     is_rl_native = False
 

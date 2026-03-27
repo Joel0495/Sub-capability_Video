@@ -1,6 +1,6 @@
 """Source adapter for STAR (train split).
 
-HF repo: STAR-Benchmark/STAR
+HF repo: csbobby/STAR_Benchmark
 Situated reasoning in real-world videos, ~45k train samples.
 25% sequencing questions with temporal focus.
 """
@@ -26,7 +26,7 @@ from schema.canonical import (
 class STARAdapter(BaseAdapter):
     dataset_name = "star"
     display_name = "STAR"
-    hf_repo = "STAR-Benchmark/STAR"
+    hf_repo = "csbobby/STAR_Benchmark"
     license = "MIT"
     is_rl_native = False
 

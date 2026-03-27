@@ -32,34 +32,34 @@ hf_datasets:
     note: "Next-event prediction, 33k pairs"
 
   nextqa:
-    repo_id: "lmms-lab/NExT-QA"
+    repo_id: "lmms-lab/NExTQA"
     type: "dataset"
     note: "Causal video QA, ~35k train"
 
   star:
-    repo_id: "STAR-Benchmark/STAR"
+    repo_id: "csbobby/STAR_Benchmark"
     type: "dataset"
-    note: "Situated reasoning, ~45k train"
+    note: "Situated reasoning, ~45k train (GitHub mirror on HF)"
 
   clevrer:
-    repo_id: "dali-does/CLEVRER"
+    repo_id: "zechen-nlp/clevrer"
     type: "dataset"
     note: "Synthetic reasoning, ~20k train"
 
   qvhighlights:
-    repo_id: "jayleicn/QVHighlights"
+    repo_id: "VLM2Vec/QVHighlight"
     type: "dataset"
     note: "Moment retrieval, ~10k train"
 
   tvqa:
-    repo_id: "lmms-lab/TVQA"
+    repo_id: "pengxiang/tvqa"
     type: "dataset"
     note: "TV show QA, ~120k train"
 
   activitynet_captions:
-    repo_id: "HuggingFaceM4/ActivityNet-Captions"
+    repo_id: "HuggingFaceM4/ActivitiyNet_Captions"
     type: "dataset"
-    note: "Activity captioning, ~37k train"
+    note: "Activity captioning, ~37k train (note: upstream typo in repo name)"
 
 # Non-HuggingFace datasets (require manual download)
 manual_datasets:

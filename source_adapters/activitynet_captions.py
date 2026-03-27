@@ -1,6 +1,6 @@
 """Source adapter for ActivityNet Captions (train split).
 
-HF repo: HuggingFaceM4/ActivityNet-Captions
+HF repo: HuggingFaceM4/ActivitiyNet_Captions
 Activity captioning with temporal annotations, ~37k train segments.
 """
 
@@ -29,7 +29,7 @@ from schema.canonical import (
 class ActivityNetCaptionsAdapter(BaseAdapter):
     dataset_name = "activitynet_captions"
     display_name = "ActivityNet Captions"
-    hf_repo = "HuggingFaceM4/ActivityNet-Captions"
+    hf_repo = "HuggingFaceM4/ActivitiyNet_Captions"
     license = "MIT"
     is_rl_native = False
 

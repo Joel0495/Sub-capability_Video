@@ -39,7 +39,7 @@ datasets:
   # ─── Priority-1 trainable datasets ───────────────────────────────────────
   nextqa:
     display_name: "NExT-QA"
-    hf_repo: "lmms-lab/NExT-QA"
+    hf_repo: "lmms-lab/NExTQA"
     layer: "C"  # Benchmark-to-RLVR converted
     size_est: 35000
     license: "BSD"
@@ -50,7 +50,7 @@ datasets:
 
   star:
     display_name: "STAR"
-    hf_repo: "STAR-Benchmark/STAR"
+    hf_repo: "csbobby/STAR_Benchmark"
     layer: "C"
     size_est: 45000
     license: "MIT"
@@ -62,7 +62,7 @@ datasets:
 
   clevrer:
     display_name: "CLEVRER"
-    hf_repo: "dali-does/CLEVRER"
+    hf_repo: "zechen-nlp/clevrer"
     layer: "C"
     size_est: 20000
     license: "MIT"
@@ -76,7 +76,7 @@ datasets:
 
   qvhighlights:
     display_name: "QVHighlights"
-    hf_repo: "jayleicn/QVHighlights"
+    hf_repo: "VLM2Vec/QVHighlight"
     layer: "C"
     size_est: 10000
     license: "MIT"
@@ -87,7 +87,7 @@ datasets:
 
   tvqa:
     display_name: "TVQA"
-    hf_repo: "lmms-lab/TVQA"
+    hf_repo: "pengxiang/tvqa"
     layer: "C"
     size_est: 120000
     license: "MIT"
@@ -99,7 +99,7 @@ datasets:
 
   activitynet_captions:
     display_name: "ActivityNet Captions"
-    hf_repo: "HuggingFaceM4/ActivityNet-Captions"
+    hf_repo: "HuggingFaceM4/ActivitiyNet_Captions"
     layer: "C"
     size_est: 37000
     license: "MIT"

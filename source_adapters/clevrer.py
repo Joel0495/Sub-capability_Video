@@ -1,6 +1,6 @@
 """Source adapter for CLEVRER (train split).
 
-HF repo: dali-does/CLEVRER
+HF repo: zechen-nlp/clevrer
 Synthetic video reasoning, ~20k train samples.
 Serves: causal, future prediction, spatial, anti-shortcut.
 """
@@ -26,7 +26,7 @@ from schema.canonical import (
 class CLEVRERAdapter(BaseAdapter):
     dataset_name = "clevrer"
     display_name = "CLEVRER"
-    hf_repo = "dali-does/CLEVRER"
+    hf_repo = "zechen-nlp/clevrer"
     license = "MIT"
     is_rl_native = False
 

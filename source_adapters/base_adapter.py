@@ -41,7 +41,7 @@ class BaseAdapter(ABC):
     # Subclasses must set these
     dataset_name: str = ""          # e.g., "nextqa"
     display_name: str = ""          # e.g., "NExT-QA"
-    hf_repo: Optional[str] = None   # e.g., "lmms-lab/NExT-QA"
+    hf_repo: Optional[str] = None   # e.g., "lmms-lab/NExTQA"
     license: str = "follow_source_dataset"
     is_rl_native: bool = False      # True for Video-R1, SpaceR, NEP
 
