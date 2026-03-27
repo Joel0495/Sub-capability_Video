@@ -1,5 +1,7 @@
 """Orchestrator: collect all datasets across builders and generate one master download script."""
 
+from __future__ import annotations
+
 import yaml
 from pathlib import Path
 

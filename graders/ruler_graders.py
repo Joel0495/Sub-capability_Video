@@ -3,6 +3,8 @@
 Prefer ruler graders whenever possible. Model graders are fallback only.
 """
 
+from __future__ import annotations
+
 import re
 from typing import Optional
 

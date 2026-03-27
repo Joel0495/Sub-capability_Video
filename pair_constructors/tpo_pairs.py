@@ -6,6 +6,8 @@ model seeing the full video; the "rejected" response from the model
 seeing only sparsely sampled frames.
 """
 
+from __future__ import annotations
+
 from typing import Iterator
 
 from schema.canonical import CanonicalSample

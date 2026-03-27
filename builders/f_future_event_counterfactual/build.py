@@ -4,6 +4,8 @@ Uses NEPV1Adapter, STARAdapter, CLEVRERAdapter, and Ego4DAdapter for
 future prediction and counterfactual reasoning data.
 """
 
+from __future__ import annotations
+
 from schema.canonical import CanonicalSample, SubCapability, TaskType
 from source_adapters.base_adapter import BaseAdapter
 from source_adapters.nep_v1 import NEPV1Adapter

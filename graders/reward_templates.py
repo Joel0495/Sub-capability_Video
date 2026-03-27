@@ -3,6 +3,8 @@
 Each template computes a weighted combination of component scores.
 """
 
+from __future__ import annotations
+
 import yaml
 from pathlib import Path
 from typing import Optional

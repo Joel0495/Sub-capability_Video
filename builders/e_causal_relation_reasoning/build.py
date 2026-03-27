@@ -3,6 +3,8 @@
 Uses NExTQAAdapter, STARAdapter, and CLEVRERAdapter for causal reasoning data.
 """
 
+from __future__ import annotations
+
 from schema.canonical import CanonicalSample, SubCapability, TaskType
 from source_adapters.base_adapter import BaseAdapter
 from source_adapters.nextqa import NExTQAAdapter

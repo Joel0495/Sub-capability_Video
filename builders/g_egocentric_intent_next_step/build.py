@@ -3,6 +3,8 @@
 Uses Ego4DAdapter for egocentric video understanding data.
 """
 
+from __future__ import annotations
+
 from schema.canonical import CanonicalSample, SubCapability, TaskType
 from source_adapters.base_adapter import BaseAdapter
 from source_adapters.ego4d import Ego4DAdapter

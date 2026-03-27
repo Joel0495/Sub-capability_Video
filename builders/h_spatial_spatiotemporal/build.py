@@ -4,6 +4,8 @@ Uses SpaceRAdapter and CLEVRERAdapter for spatial and spatiotemporal
 reasoning data.
 """
 
+from __future__ import annotations
+
 from schema.canonical import CanonicalSample, SubCapability, TaskType
 from source_adapters.base_adapter import BaseAdapter
 from source_adapters.spacer import SpaceRAdapter

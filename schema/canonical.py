@@ -5,6 +5,8 @@ This implements the exact JSON structure from the spec:
   video_url.url: always file:// local paths, never base64
 """
 
+from __future__ import annotations
+
 from enum import Enum
 from typing import Optional, Literal, Union
 from pydantic import BaseModel, Field, field_validator

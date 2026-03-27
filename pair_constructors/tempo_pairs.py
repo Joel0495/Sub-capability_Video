@@ -10,7 +10,9 @@ These pairs feed into capability K (anti_shortcut_contrast) and
 can augment any capability's RL-ready data.
 """
 
-from typing import Iterator
+from __future__ import annotations
+
+from typing import Iterator, Optional
 from schema.canonical import (
     CanonicalSample,
     SubCapability,
@@ -67,7 +69,7 @@ class TEMPOPairConstructor:
 
     def _create_perturbed(
         self, sample: CanonicalSample
-    ) -> CanonicalSample | None:
+    ) -> Optional[CanonicalSample]:
         """Create a perturbed version of a sample.
 
         TODO: Implement actual perturbation logic:

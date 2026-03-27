@@ -4,6 +4,8 @@ Each raw dataset gets exactly one adapter. Multiple builders can reuse
 the same adapter with different filters for different sub-capabilities.
 """
 
+from __future__ import annotations
+
 import yaml
 from abc import ABC, abstractmethod
 from pathlib import Path

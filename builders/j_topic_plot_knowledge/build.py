@@ -4,6 +4,8 @@ Uses TVQAAdapter and ActivityNetCaptionsAdapter for topic and plot
 knowledge data.
 """
 
+from __future__ import annotations
+
 from schema.canonical import CanonicalSample, SubCapability, TaskType
 from source_adapters.base_adapter import BaseAdapter
 from source_adapters.tvqa import TVQAAdapter

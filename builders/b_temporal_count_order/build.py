@@ -3,6 +3,8 @@
 Uses VideoR1Adapter for RL-native temporal counting and ordering data.
 """
 
+from __future__ import annotations
+
 from schema.canonical import CanonicalSample, SubCapability, TaskType
 from source_adapters.base_adapter import BaseAdapter
 from source_adapters.video_r1 import VideoR1Adapter

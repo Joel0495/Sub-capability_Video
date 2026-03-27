@@ -2,7 +2,7 @@
 name = "video-rl-dataset-builder"
 version = "0.1.0"
 description = "Unified Video RL/RLVR dataset builder for 11 sub-capabilities"
-requires-python = ">=3.10"
+requires-python = ">=3.9"
 dependencies = [
     "pydantic>=2.0",
     "orjsonl>=1.0",

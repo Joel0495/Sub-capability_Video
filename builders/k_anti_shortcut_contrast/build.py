@@ -4,6 +4,8 @@ Uses VideoR1Adapter, SpaceRAdapter, and CLEVRERAdapter for anti-shortcut
 and contrastive reasoning data.
 """
 
+from __future__ import annotations
+
 from schema.canonical import CanonicalSample, SubCapability, TaskType
 from source_adapters.base_adapter import BaseAdapter
 from source_adapters.video_r1 import VideoR1Adapter

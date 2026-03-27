@@ -1,5 +1,7 @@
 """Validator: validate all JSONL files against the canonical schema and check for issues."""
 
+from __future__ import annotations
+
 import json
 from pathlib import Path
 
