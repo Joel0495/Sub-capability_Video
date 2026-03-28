@@ -1,7 +1,10 @@
-"""Generate ~50 diagnostic evaluation samples for quick sub-capability probing.
+"""Generate ~50 diagnostic evaluation samples using real synthetic videos.
 
-Each sample covers one of the 11 sub-capabilities. The questions are designed
-to test specific reasoning patterns, making it easy to detect model weaknesses.
+Each sample covers one of the 11 sub-capabilities. Questions are designed so
+that models MUST watch the video to answer correctly — text alone is ambiguous.
+
+Pre-requisite: run `python -m scripts.generate_diagnostic_videos` first to
+create the 15 synthetic videos in data/diagnostic/videos/.
 
 Usage:
     python -m scripts.build_diagnostic [--output data/diagnostic/diagnostic_eval.jsonl]
@@ -10,6 +13,7 @@ Usage:
 from __future__ import annotations
 
 import json
+import os
 import sys
 from pathlib import Path
 from typing import Optional
@@ -34,6 +38,14 @@ from schema.canonical import (
     SamplingInfo,
 )
 
+# Base path for diagnostic videos (absolute, will be set at build time)
+_VIDEO_BASE = Path(__file__).resolve().parent.parent / "data" / "diagnostic" / "videos"
+
+
+def _vpath(filename: str) -> str:
+    """Return file:// URL for a diagnostic video."""
+    return f"file://{_VIDEO_BASE / filename}"
+
 
 def _msg(video_url: str, question: str, answer: str, subtitle: Optional[str] = None) -> list:
     """Build standard messages."""
@@ -44,7 +56,10 @@ def _msg(video_url: str, question: str, answer: str, subtitle: Optional[str] = N
     if subtitle:
         user_content.append(TextContent(text=f"Subtitle context: {subtitle}"))
     return [
-        Message(role="system", content=[TextContent(text="You are a video reasoning assistant. Follow the required answer format exactly.")]),
+        Message(role="system", content=[TextContent(
+            text="You are a video reasoning assistant. Watch the video carefully "
+                 "and answer based ONLY on what you observe. Follow the required answer format exactly."
+        )]),
         Message(role="user", content=user_content),
         Message(role="assistant", content=[TextContent(text=answer)]),
     ]
@@ -71,13 +86,16 @@ def _sample(data_id: str, cap: str, ability: str, sub: list, task: str,
         data_info=DataInfo(
             data_id=data_id,
             ability=ability,
-            datasource="diagnostic_synthetic",
+            datasource="diagnostic_synthetic_video",
             special_purpose="diagnostic_eval",
             sub_ability=sub,
             task_type=task,
             split="eval",
             evidence=evidence,
-            build_info=BuildInfo(build_type=BuildType.SYNTHETIC),
+            build_info=BuildInfo(
+                build_type=BuildType.SYNTHETIC,
+                video_path=video,
+            ),
         ),
         extra_info=ExtraInfo(
             sampling_info=SamplingInfo(mix_bucket=cap),
@@ -87,11 +105,13 @@ def _sample(data_id: str, cap: str, ability: str, sub: list, task: str,
 
 
 # ─────────────────────────────────────────────────────────────────────────────
-#  Diagnostic samples: 11 capabilities × ~5 each ≈ 50 samples
+#  Diagnostic samples: 11 capabilities × ~4-5 each ≈ 50 samples
+#  ALL questions require watching the actual video to answer correctly.
 # ─────────────────────────────────────────────────────────────────────────────
 
 SAMPLES = []
 _id = 0
+
 
 def _next_id(prefix: str) -> str:
     global _id
@@ -100,368 +120,543 @@ def _next_id(prefix: str) -> str:
 
 
 # ═══════════════════════════════════════════════════════════════════════════════
-#  A. temporal_atomic — 事件先后/速度/方向/状态变化
+#  A. temporal_atomic — event order / speed / direction / state change
+#  Videos: v01 (three objects appear), v06 (color change), v09 (fast vs slow)
 # ═══════════════════════════════════════════════════════════════════════════════
 
-V = "file:///data/diagnostic/placeholder.mp4"
+V01 = _vpath("v01_three_objects_appear.mp4")
+V06 = _vpath("v06_color_change_sequence.mp4")
+V09 = _vpath("v09_fast_vs_slow.mp4")
 
 SAMPLES.append(_sample(
-    _next_id("ta"), "temporal_atomic", "Temporal", ["event_order"], "mcq", V,
-    "Question: In this video, a person first picks up a cup, then sits down, then drinks. Which action happens SECOND? Options: A. pick up cup B. sit down C. drink D. stand up. Answer with one capital letter.",
+    _next_id("ta"), "temporal_atomic", "Temporal", ["event_order"], "mcq", V01,
+    "Question: Watch the video. Three colored objects appear at different times. "
+    "Which color appears SECOND? "
+    "Options: A. Red B. Blue C. Green D. Yellow. Answer with one capital letter.",
     "B", _mcq_grader("B"),
 ))
 
 SAMPLES.append(_sample(
-    _next_id("ta"), "temporal_atomic", "Temporal", ["before_after"], "mcq", V,
-    "Question: A ball is thrown upward, reaches the peak, then falls down. What happens immediately BEFORE the ball falls down? Options: A. thrown upward B. reaches the peak C. bounces D. rolls. Answer with one capital letter.",
-    "B", _mcq_grader("B"),
+    _next_id("ta"), "temporal_atomic", "Temporal", ["event_order"], "mcq", V01,
+    "Question: Watch the video carefully. Which colored object appears FIRST? "
+    "Options: A. Green B. Yellow C. Blue D. Red. Answer with one capital letter.",
+    "D", _mcq_grader("D"),
 ))
 
 SAMPLES.append(_sample(
-    _next_id("ta"), "temporal_atomic", "Temporal", ["speed"], "mcq", V,
-    "Question: A car accelerates from 0 to 60 km/h in 5 seconds, then maintains speed for 10 seconds, then decelerates to 0 in 3 seconds. During which phase is the car moving fastest? Options: A. acceleration phase B. constant speed phase C. deceleration phase D. all the same. Answer with one capital letter.",
-    "B", _mcq_grader("B"),
-))
-
-SAMPLES.append(_sample(
-    _next_id("ta"), "temporal_atomic", "Temporal", ["attribute_change"], "mcq", V,
-    "Question: A traffic light changes from green to yellow to red. After the light turns yellow, what color will it change to NEXT? Options: A. green B. yellow C. red D. blue. Answer with one capital letter.",
+    _next_id("ta"), "temporal_atomic", "Temporal", ["attribute_change"], "mcq", V06,
+    "Question: Watch the color changes in this video. What color appears BETWEEN "
+    "red and green? "
+    "Options: A. Blue B. White C. Yellow D. Purple. Answer with one capital letter.",
     "C", _mcq_grader("C"),
 ))
 
 SAMPLES.append(_sample(
-    _next_id("ta"), "temporal_atomic", "Temporal", ["action_phase"], "mcq", V,
-    "Question: A gymnast performs a vault: runs, jumps on the springboard, pushes off the vault table, flips in the air, and lands. What phase comes directly after pushing off the vault table? Options: A. running B. jumping on springboard C. flipping in the air D. landing. Answer with one capital letter.",
-    "C", _mcq_grader("C"),
+    _next_id("ta"), "temporal_atomic", "Temporal", ["speed"], "mcq", V09,
+    "Question: This video shows two objects moving at different speeds. "
+    "Which colored object moves FASTER? "
+    "Options: A. Blue B. Red C. They move at the same speed D. Green. Answer with one capital letter.",
+    "B", _mcq_grader("B"),
 ))
 
+SAMPLES.append(_sample(
+    _next_id("ta"), "temporal_atomic", "Temporal", ["attribute_change"], "mcq", V06,
+    "Question: Watch the video. What is the LAST color shown in the sequence? "
+    "Options: A. Red B. Blue C. Yellow D. Green. Answer with one capital letter.",
+    "D", _mcq_grader("D"),
+))
+
+
 # ═══════════════════════════════════════════════════════════════════════════════
-#  B. temporal_count_order — 计数/排序
+#  B. temporal_count_order — counting / ordering
+#  Videos: v04 (five objects), v01 (three objects), v12 (sequential positions)
 # ═══════════════════════════════════════════════════════════════════════════════
 
+V04 = _vpath("v04_five_objects_counting.mp4")
+V12 = _vpath("v12_sequential_positions.mp4")
+
 SAMPLES.append(_sample(
-    _next_id("tco"), "temporal_count_order", "Temporal", ["action_count"], "count", V,
-    "Question: In the video, a person claps 3 times, pauses, then claps 2 more times. How many total claps are there? Answer with a number only.",
+    _next_id("tco"), "temporal_count_order", "Temporal", ["action_count"], "count", V04,
+    "Question: Watch the video and count: How many colored objects appear in total "
+    "by the end of the video? Answer with a number only.",
     "5", _exact_grader("5"),
 ))
 
 SAMPLES.append(_sample(
-    _next_id("tco"), "temporal_count_order", "Temporal", ["action_order"], "order", V,
-    "Question: A chef performs these actions in the video: chops onion, boils water, adds salt, stirs the pot. What is the correct order? Options: A. chops→boils→adds salt→stirs B. boils→chops→adds salt→stirs C. chops→adds salt→boils→stirs D. stirs→boils→adds salt→chops. Answer with one capital letter.",
+    _next_id("tco"), "temporal_count_order", "Temporal", ["action_order"], "mcq", V01,
+    "Question: Watch the video. Three objects appear in sequence. "
+    "What is the correct order of colors? "
+    "Options: A. Red→Blue→Green B. Blue→Red→Green C. Green→Blue→Red D. Red→Green→Blue. "
+    "Answer with one capital letter.",
     "A", _mcq_grader("A"),
 ))
 
 SAMPLES.append(_sample(
-    _next_id("tco"), "temporal_count_order", "Temporal", ["repeated_events"], "count", V,
-    "Question: A dog fetches a ball. The owner throws the ball 4 times. The dog successfully retrieves it 3 times and misses once. How many successful retrievals? Answer with a number only.",
+    _next_id("tco"), "temporal_count_order", "Temporal", ["action_count"], "count", V01,
+    "Question: Watch the video. How many colored objects appear during the entire video? "
+    "Answer with a number only.",
     "3", _exact_grader("3"),
 ))
 
 SAMPLES.append(_sample(
-    _next_id("tco"), "temporal_count_order", "Temporal", ["step_indexing"], "mcq", V,
-    "Question: In an assembly tutorial, the steps are: (1) attach base, (2) insert screws, (3) mount panel, (4) connect wires, (5) test power. Which step number involves 'connect wires'? Options: A. 2 B. 3 C. 4 D. 5. Answer with one capital letter.",
-    "C", _mcq_grader("C"),
-))
-
-# ═══════════════════════════════════════════════════════════════════════════════
-#  C. temporal_grounding — 时序定位
-# ═══════════════════════════════════════════════════════════════════════════════
-
-SAMPLES.append(_sample(
-    _next_id("tg"), "temporal_grounding", "Temporal", ["moment_retrieval"], "grounding", V,
-    "Question: The video is 60 seconds long. A person starts dancing at 15s and stops at 30s. Locate the moment when the person is dancing. Answer with start and end timestamps in seconds, e.g., [start, end].",
-    "[15.0, 30.0]", _span_grader("[15.0, 30.0]"),
-    evidence=Evidence(support_spans=[[15.0, 30.0]]),
-))
-
-SAMPLES.append(_sample(
-    _next_id("tg"), "temporal_grounding", "Temporal", ["moment_retrieval"], "grounding", V,
-    "Question: In a 120-second cooking video, the chef adds spices between 45s and 55s, then plates the dish between 90s and 110s. When does the chef plate the dish? Answer with [start, end].",
-    "[90.0, 110.0]", _span_grader("[90.0, 110.0]"),
-    evidence=Evidence(support_spans=[[90.0, 110.0]]),
-))
-
-SAMPLES.append(_sample(
-    _next_id("tg"), "temporal_grounding", "Temporal", ["highlight_detection"], "grounding", V,
-    "Question: In a 90-second soccer video, goals are scored at 20-22s and 75-78s. Locate ALL goal-scoring moments. Answer as [start1, end1]; [start2, end2].",
-    "[20.0, 22.0]; [75.0, 78.0]", _span_grader("[20.0, 22.0]; [75.0, 78.0]"),
-    evidence=Evidence(support_spans=[[20.0, 22.0], [75.0, 78.0]]),
-))
-
-SAMPLES.append(_sample(
-    _next_id("tg"), "temporal_grounding", "Temporal", ["support_span_localization"], "grounding", V,
-    "Question: A 45-second video shows a cat sleeping (0-20s), waking up (20-25s), and playing with a toy (25-45s). When does the cat wake up? Answer with [start, end].",
-    "[20.0, 25.0]", _span_grader("[20.0, 25.0]"),
-    evidence=Evidence(support_spans=[[20.0, 25.0]]),
-))
-
-# ═══════════════════════════════════════════════════════════════════════════════
-#  D. long_video_retrieval_memory — 长视频记忆检索
-# ═══════════════════════════════════════════════════════════════════════════════
-
-SAMPLES.append(_sample(
-    _next_id("lv"), "long_video_retrieval_memory", "Memory", ["needle_retrieval"], "mcq", V,
-    "Question: In a 30-minute lecture video, the professor mentions a key formula 'E=mc²' exactly once at around the 18-minute mark. What formula did the professor mention? Options: A. F=ma B. E=mc² C. PV=nRT D. a²+b²=c². Answer with one capital letter.",
-    "B", _mcq_grader("B"),
-    subtitle="...and as Einstein showed, E equals m c squared, which fundamentally changed physics...",
-))
-
-SAMPLES.append(_sample(
-    _next_id("lv"), "long_video_retrieval_memory", "Memory", ["referred_reasoning"], "mcq", V,
-    "Question: In a 1-hour documentary, the narrator explains at minute 5 that coral reefs need water above 20°C, and at minute 45 mentions a reef in water at 15°C. Is this second reef likely healthy? Options: A. Yes, it's thriving B. No, the water is too cold C. Cannot determine D. Temperature doesn't matter. Answer with one capital letter.",
-    "B", _mcq_grader("B"),
-))
-
-SAMPLES.append(_sample(
-    _next_id("lv"), "long_video_retrieval_memory", "Memory", ["subtitle_grounded_lookup"], "mcq", V,
-    "Question: Based on the subtitles, Character A says 'I'll meet you at the park at 3pm' in scene 2, and in scene 7, Character B asks 'Where should we go?' What should Character B's answer be? Options: A. the mall B. the park C. the office D. home. Answer with one capital letter.",
-    "B", _mcq_grader("B"),
-    subtitle="Scene 2 - A: 'I'll meet you at the park at 3pm.' ... Scene 7 - B: 'Where should we go?'",
-))
-
-SAMPLES.append(_sample(
-    _next_id("lv"), "long_video_retrieval_memory", "Memory", ["long_context_memory"], "mcq", V,
-    "Question: A security camera records 24 hours. A red car parks at 8:15 AM, a blue truck arrives at 2:30 PM, and the red car leaves at 6:45 PM. How long was the red car parked? Options: A. ~6.5 hours B. ~8 hours C. ~10.5 hours D. ~4 hours. Answer with one capital letter.",
-    "C", _mcq_grader("C"),
-))
-
-# ═══════════════════════════════════════════════════════════════════════════════
-#  E. causal_relation_reasoning — 因果推理
-# ═══════════════════════════════════════════════════════════════════════════════
-
-SAMPLES.append(_sample(
-    _next_id("cr"), "causal_relation_reasoning", "Causal", ["causal_why_how"], "mcq", V,
-    "Question: In the video, a child pushes a tower of blocks and it falls over. Why did the tower fall? Options: A. The blocks were glued B. The child pushed it C. The wind blew D. It was already falling. Answer with one capital letter.",
-    "B", _mcq_grader("B"),
-))
-
-SAMPLES.append(_sample(
-    _next_id("cr"), "causal_relation_reasoning", "Causal", ["feasibility"], "mcq", V,
-    "Question: A person tries to pour water from an upside-down sealed bottle. Will water come out? Options: A. Yes, immediately B. No, the seal prevents it C. Only if shaken D. Yes, due to gravity. Answer with one capital letter.",
-    "B", _mcq_grader("B"),
-))
-
-SAMPLES.append(_sample(
-    _next_id("cr"), "causal_relation_reasoning", "Causal", ["interaction_logic"], "mcq", V,
-    "Question: Person A hands a book to Person B. Person B places it on a table. Person C picks up the book from the table. Who last had physical contact with the book before Person C? Options: A. Person A B. Person B C. The table D. Nobody. Answer with one capital letter.",
-    "B", _mcq_grader("B"),
-))
-
-SAMPLES.append(_sample(
-    _next_id("cr"), "causal_relation_reasoning", "Causal", ["temporal_relation"], "mcq", V,
-    "Question: It starts raining. Then the ground gets wet. Then a person slips on the wet ground. What is the root cause of the person slipping? Options: A. The ground being wet B. The rain C. The person walking D. Gravity. Answer with one capital letter.",
-    "B", _mcq_grader("B"),
-))
-
-SAMPLES.append(_sample(
-    _next_id("cr"), "causal_relation_reasoning", "Causal", ["causal_why_how"], "mcq", V,
-    "Question: A glass of ice water is left in the sun. After 30 minutes, the ice has melted. Why did the ice melt? Options: A. The glass broke B. Someone stirred it C. Heat from sunlight D. The water was already warm. Answer with one capital letter.",
-    "C", _mcq_grader("C"),
-))
-
-# ═══════════════════════════════════════════════════════════════════════════════
-#  F. future_event_counterfactual — 未来预测/反事实
-# ═══════════════════════════════════════════════════════════════════════════════
-
-SAMPLES.append(_sample(
-    _next_id("fc"), "future_event_counterfactual", "Prediction", ["what_happens_next"], "mcq", V,
-    "Question: A person is holding a full glass of water and trips on a step. What most likely happens next? Options: A. The water stays in the glass B. The water spills C. The glass flies upward D. Nothing happens. Answer with one capital letter.",
-    "B", _mcq_grader("B"),
-))
-
-SAMPLES.append(_sample(
-    _next_id("fc"), "future_event_counterfactual", "Prediction", ["counterfactual_outcome"], "mcq", V,
-    "Question: In the video, a goalkeeper dives left and catches the ball. If the goalkeeper had dived right instead, what would have happened? Options: A. Still caught the ball B. The ball would have gone in C. The game would stop D. The ball would disappear. Answer with one capital letter.",
-    "B", _mcq_grader("B"),
-))
-
-SAMPLES.append(_sample(
-    _next_id("fc"), "future_event_counterfactual", "Prediction", ["anticipation"], "mcq", V,
-    "Question: Dark clouds are forming, the wind is picking up, and people on the street are opening umbrellas. What is about to happen? Options: A. An earthquake B. It will rain C. A parade is coming D. The sun will come out. Answer with one capital letter.",
-    "B", _mcq_grader("B"),
-))
-
-SAMPLES.append(_sample(
-    _next_id("fc"), "future_event_counterfactual", "Prediction", ["future_event_summary"], "mcq", V,
-    "Question: A pot of water is on the stove with the burner on high. Bubbles are starting to form at the bottom. What will happen in the next minute? Options: A. The water will freeze B. The water will boil fully C. The pot will explode D. The water will evaporate instantly. Answer with one capital letter.",
-    "B", _mcq_grader("B"),
-))
-
-# ═══════════════════════════════════════════════════════════════════════════════
-#  G. egocentric_intent_next_step — 自中心意图/下一步
-# ═══════════════════════════════════════════════════════════════════════════════
-
-SAMPLES.append(_sample(
-    _next_id("ei"), "egocentric_intent_next_step", "Egocentric", ["current_step_intent"], "mcq", V,
-    "Question: In the egocentric video, the person's hands are holding a knife and a carrot on a cutting board. What is the person's current intent? Options: A. Washing dishes B. Cutting the carrot C. Eating the carrot D. Throwing away the carrot. Answer with one capital letter.",
-    "B", _mcq_grader("B"),
-))
-
-SAMPLES.append(_sample(
-    _next_id("ei"), "egocentric_intent_next_step", "Egocentric", ["next_step_planning"], "mcq", V,
-    "Question: The person has just cracked eggs into a bowl and is now reaching for a whisk. What is the most likely next step? Options: A. Crack more eggs B. Beat the eggs C. Pour the eggs into a pan D. Add flour. Answer with one capital letter.",
-    "B", _mcq_grader("B"),
-))
-
-SAMPLES.append(_sample(
-    _next_id("ei"), "egocentric_intent_next_step", "Egocentric", ["higher_level_goal"], "mcq", V,
-    "Question: Across the video, the person gathers flour, sugar, eggs, and butter, preheats the oven, and mixes ingredients in a bowl. What is the person's overall goal? Options: A. Cleaning the kitchen B. Baking a cake C. Making a salad D. Doing inventory. Answer with one capital letter.",
-    "B", _mcq_grader("B"),
-))
-
-SAMPLES.append(_sample(
-    _next_id("ei"), "egocentric_intent_next_step", "Egocentric", ["procedural_anticipation"], "mcq", V,
-    "Question: In an egocentric repair video, the person has removed a flat tire and is now positioning the spare tire. What step comes after mounting the spare? Options: A. Remove the flat tire B. Tighten the lug nuts C. Lower the car D. Drive away immediately. Answer with one capital letter.",
-    "B", _mcq_grader("B"),
-))
-
-# ═══════════════════════════════════════════════════════════════════════════════
-#  H. spatial_spatiotemporal_reasoning — 空间/时空推理
-# ═══════════════════════════════════════════════════════════════════════════════
-
-SAMPLES.append(_sample(
-    _next_id("sp"), "spatial_spatiotemporal_reasoning", "Spatial", ["relative_position"], "mcq", V,
-    "Question: In the scene, a red ball is on top of a blue box, and the blue box is to the left of a green cylinder. Where is the red ball relative to the green cylinder? Options: A. To the right B. To the upper-left C. Below D. Behind. Answer with one capital letter.",
-    "B", _mcq_grader("B"),
-))
-
-SAMPLES.append(_sample(
-    _next_id("sp"), "spatial_spatiotemporal_reasoning", "Spatial", ["motion_in_space"], "mcq", V,
-    "Question: A car starts at the left side of the frame, moves to the right, then makes a U-turn and drives back to the left. Where does the car end up? Options: A. Right side B. Center C. Left side D. Off-screen. Answer with one capital letter.",
+    _next_id("tco"), "temporal_count_order", "Temporal", ["action_order"], "mcq", V12,
+    "Question: Watch the video. Four colored objects appear at different times and positions. "
+    "Which color appears THIRD? "
+    "Options: A. Red B. Blue C. Green D. Yellow. Answer with one capital letter.",
     "C", _mcq_grader("C"),
 ))
 
 SAMPLES.append(_sample(
-    _next_id("sp"), "spatial_spatiotemporal_reasoning", "Spatial", ["object_person_relation"], "mcq", V,
-    "Question: Person A is standing between a table and a door. Person B is behind the table. Person A moves toward the door. Now who is closer to the table? Options: A. Person A B. Person B C. They are equidistant D. Neither is close. Answer with one capital letter.",
+    _next_id("tco"), "temporal_count_order", "Temporal", ["action_count"], "count", V12,
+    "Question: Watch the entire video. How many different colored objects appear? "
+    "Answer with a number only.",
+    "4", _exact_grader("4"),
+))
+
+
+# ═══════════════════════════════════════════════════════════════════════════════
+#  C. temporal_grounding — temporal localization
+#  Videos: v07 (object appears/disappears), v12 (sequential positions)
+# ═══════════════════════════════════════════════════════════════════════════════
+
+V07 = _vpath("v07_object_appears_disappears.mp4")
+
+SAMPLES.append(_sample(
+    _next_id("tg"), "temporal_grounding", "Temporal", ["moment_retrieval"], "grounding", V07,
+    "Question: This is a 10-second video. A blue object appears and then disappears. "
+    "At approximately what time range is the blue object visible? "
+    "Answer with [start, end] in seconds.",
+    "[3.0, 7.0]", _span_grader("[3.0, 7.0]"),
+    evidence=Evidence(support_spans=[[3.0, 7.0]]),
+))
+
+SAMPLES.append(_sample(
+    _next_id("tg"), "temporal_grounding", "Temporal", ["moment_retrieval"], "grounding", V12,
+    "Question: This is a 12-second video. A red object appears briefly. "
+    "At approximately what time range is the red object visible? "
+    "Answer with [start, end] in seconds.",
+    "[1.0, 3.0]", _span_grader("[1.0, 3.0]"),
+    evidence=Evidence(support_spans=[[1.0, 3.0]]),
+))
+
+SAMPLES.append(_sample(
+    _next_id("tg"), "temporal_grounding", "Temporal", ["moment_retrieval"], "grounding", V12,
+    "Question: This is a 12-second video with objects appearing at different times. "
+    "When does the blue object appear? Answer with [start, end] in seconds.",
+    "[4.0, 6.0]", _span_grader("[4.0, 6.0]"),
+    evidence=Evidence(support_spans=[[4.0, 6.0]]),
+))
+
+SAMPLES.append(_sample(
+    _next_id("tg"), "temporal_grounding", "Temporal", ["highlight_detection"], "mcq", V07,
+    "Question: In this 10-second video, a blue object is visible during part of the clip. "
+    "For approximately how many seconds is the blue object visible? "
+    "Options: A. 2 seconds B. 4 seconds C. 6 seconds D. 8 seconds. Answer with one capital letter.",
+    "B", _mcq_grader("B"),
+))
+
+
+# ═══════════════════════════════════════════════════════════════════════════════
+#  D. long_video_retrieval_memory — memory / needle retrieval
+#  Videos: v14 (multiple events in 15s clip), v12 (sequential positions)
+# ═══════════════════════════════════════════════════════════════════════════════
+
+V14 = _vpath("v14_multiple_events_long.mp4")
+
+SAMPLES.append(_sample(
+    _next_id("lv"), "long_video_retrieval_memory", "Memory", ["needle_retrieval"], "mcq", V14,
+    "Question: Watch the entire 15-second video carefully. "
+    "A brief red flash occurs at one point. At approximately what time does the red flash happen? "
+    "Options: A. Around 1 second B. Around 3 seconds C. Around 7 seconds D. Around 11 seconds. "
+    "Answer with one capital letter.",
     "B", _mcq_grader("B"),
 ))
 
 SAMPLES.append(_sample(
-    _next_id("sp"), "spatial_spatiotemporal_reasoning", "Spatial", ["topological_change"], "mcq", V,
-    "Question: A ring is threaded onto a rope. The rope is then cut in the middle. How many separate pieces of rope are there, and is the ring still on a rope? Options: A. 2 pieces, ring still on one B. 2 pieces, ring falls off C. 1 piece, ring still on D. 3 pieces. Answer with one capital letter.",
-    "A", _mcq_grader("A"),
+    _next_id("lv"), "long_video_retrieval_memory", "Memory", ["needle_retrieval"], "mcq", V14,
+    "Question: In this 15-second video, a green object briefly appears. "
+    "At approximately what time does it show up? "
+    "Options: A. 2 seconds B. 5 seconds C. 7 seconds D. 13 seconds. "
+    "Answer with one capital letter.",
+    "C", _mcq_grader("C"),
 ))
 
-# ═══════════════════════════════════════════════════════════════════════════════
-#  I. multimodal_av_fusion — 音视频融合
-# ═══════════════════════════════════════════════════════════════════════════════
-
 SAMPLES.append(_sample(
-    _next_id("av"), "multimodal_av_fusion", "AV-Fusion", ["sound_source_alignment"], "mcq", V,
-    "Question: In the video, a dog is visible on the left and a cat on the right. A barking sound is heard. Which animal is making the sound? Options: A. The cat B. The dog C. Neither D. Both. Answer with one capital letter.",
+    _next_id("lv"), "long_video_retrieval_memory", "Memory", ["referred_reasoning"], "mcq", V14,
+    "Question: Watch this video. Two colored flashes occur at different times. "
+    "What are their colors? "
+    "Options: A. Red and Green B. Red and Blue C. Blue and Green D. Yellow and Red. "
+    "Answer with one capital letter.",
     "B", _mcq_grader("B"),
 ))
 
 SAMPLES.append(_sample(
-    _next_id("av"), "multimodal_av_fusion", "AV-Fusion", ["cross_modal_disambiguation"], "mcq", V,
-    "Question: The video shows a person moving their lips, but the audio says 'I love cats' while the subtitles read 'I love bats'. Based on the audio, what did the person actually say? Options: A. I love cats B. I love bats C. I love hats D. I love rats. Answer with one capital letter.",
+    _next_id("lv"), "long_video_retrieval_memory", "Memory", ["long_context_memory"], "count", V14,
+    "Question: Watch the entire 15-second video. How many distinct brief events "
+    "(flashes or object appearances) occur throughout? Answer with a number only.",
+    "4", _exact_grader("4"),
+))
+
+
+# ═══════════════════════════════════════════════════════════════════════════════
+#  E. causal_relation_reasoning — cause-and-effect
+#  Videos: v03 (collision), v05 (falling object)
+# ═══════════════════════════════════════════════════════════════════════════════
+
+V03 = _vpath("v03_two_objects_collide.mp4")
+V05 = _vpath("v05_object_falling.mp4")
+
+SAMPLES.append(_sample(
+    _next_id("cr"), "causal_relation_reasoning", "Causal", ["causal_why_how"], "mcq", V03,
+    "Question: Watch the video. Two objects move toward each other and meet in the middle. "
+    "What causes them to meet? "
+    "Options: A. They are both stationary B. They both move toward the center "
+    "C. Only the red one moves D. Only the blue one moves. Answer with one capital letter.",
+    "B", _mcq_grader("B"),
+))
+
+SAMPLES.append(_sample(
+    _next_id("cr"), "causal_relation_reasoning", "Causal", ["causal_why_how"], "mcq", V05,
+    "Question: Watch the video. A red object moves downward on a light-blue background. "
+    "What visual cue suggests the cause of this motion? "
+    "Options: A. Another object pushes it B. It accelerates downward (gravity-like) "
+    "C. It moves at constant speed D. It moves upward first. Answer with one capital letter.",
+    "B", _mcq_grader("B"),
+))
+
+SAMPLES.append(_sample(
+    _next_id("cr"), "causal_relation_reasoning", "Causal", ["interaction_logic"], "mcq", V03,
+    "Question: In the video, which objects interact with each other? "
+    "Options: A. A red and a green object B. A red and a blue object "
+    "C. Two blue objects D. A yellow and a red object. Answer with one capital letter.",
+    "B", _mcq_grader("B"),
+))
+
+SAMPLES.append(_sample(
+    _next_id("cr"), "causal_relation_reasoning", "Causal", ["feasibility"], "mcq", V05,
+    "Question: In the video, a red object falls toward a brown surface at the bottom. "
+    "What color is the surface it falls toward? "
+    "Options: A. White B. Gray C. Brown D. Green. Answer with one capital letter.",
+    "C", _mcq_grader("C"),
+))
+
+SAMPLES.append(_sample(
+    _next_id("cr"), "causal_relation_reasoning", "Causal", ["temporal_relation"], "mcq", V03,
+    "Question: In the video, when the red and blue objects approach each other, "
+    "from which side does the red object come? "
+    "Options: A. From the right B. From the top C. From the left D. From the bottom. "
+    "Answer with one capital letter.",
+    "C", _mcq_grader("C"),
+))
+
+
+# ═══════════════════════════════════════════════════════════════════════════════
+#  F. future_event_counterfactual — prediction / what-if
+#  Videos: v10 (bouncing), v03 (collision), v02 (move right then left)
+# ═══════════════════════════════════════════════════════════════════════════════
+
+V10 = _vpath("v10_bouncing_object.mp4")
+V02 = _vpath("v02_object_moves_right_left.mp4")
+
+SAMPLES.append(_sample(
+    _next_id("fc"), "future_event_counterfactual", "Prediction", ["what_happens_next"], "mcq", V10,
+    "Question: Watch the video showing an object bouncing. After the first bounce, "
+    "what happens to the object? "
+    "Options: A. It stays on the ground B. It moves back upward C. It disappears "
+    "D. It moves sideways. Answer with one capital letter.",
+    "B", _mcq_grader("B"),
+))
+
+SAMPLES.append(_sample(
+    _next_id("fc"), "future_event_counterfactual", "Prediction", ["anticipation"], "mcq", V03,
+    "Question: At the beginning of the video, a red object and a blue object "
+    "are moving toward each other. What will happen when they reach the center? "
+    "Options: A. They will stop and overlap B. They will bounce apart "
+    "C. The red one disappears D. They will move to the top. Answer with one capital letter.",
     "A", _mcq_grader("A"),
 ))
 
 SAMPLES.append(_sample(
-    _next_id("av"), "multimodal_av_fusion", "AV-Fusion", ["subtitle_audio_video_fusion"], "mcq", V,
-    "Question: A news video shows a reporter at a fire scene. The audio has sirens. The subtitle reads 'Three fire trucks responded.' How many fire trucks responded according to the subtitle? Options: A. 1 B. 2 C. 3 D. 4. Answer with one capital letter.",
+    _next_id("fc"), "future_event_counterfactual", "Prediction", ["counterfactual_outcome"], "mcq", V02,
+    "Question: In the video, an object moves right and then comes back left. "
+    "If the object had NOT reversed direction, where would it be at the end? "
+    "Options: A. Back at the starting position B. Further to the right "
+    "C. At the top of the screen D. In the center. Answer with one capital letter.",
+    "B", _mcq_grader("B"),
+))
+
+SAMPLES.append(_sample(
+    _next_id("fc"), "future_event_counterfactual", "Prediction", ["what_happens_next"], "mcq", V05,
+    "Question: In the video a red object falls. Based on its trajectory, "
+    "what will happen when it reaches the brown surface? "
+    "Options: A. It passes through B. It likely stops or bounces C. It flies upward "
+    "D. It turns blue. Answer with one capital letter.",
+    "B", _mcq_grader("B"),
+))
+
+
+# ═══════════════════════════════════════════════════════════════════════════════
+#  G. egocentric_intent_next_step — intent / next step
+#  Videos: v02 (move right-left), v06 (color change), v04 (objects appearing)
+# ═══════════════════════════════════════════════════════════════════════════════
+
+SAMPLES.append(_sample(
+    _next_id("ei"), "egocentric_intent_next_step", "Egocentric", ["next_step_planning"], "mcq", V04,
+    "Question: Watch the video where objects appear one by one. After 4 objects have appeared, "
+    "what is the most likely next event based on the observed pattern? "
+    "Options: A. All objects disappear B. A 5th object appears C. The video reverses "
+    "D. Colors change. Answer with one capital letter.",
+    "B", _mcq_grader("B"),
+))
+
+SAMPLES.append(_sample(
+    _next_id("ei"), "egocentric_intent_next_step", "Egocentric", ["current_step_intent"], "mcq", V06,
+    "Question: The video shows a changing color display. Midway through the video, "
+    "what color is currently displayed? "
+    "Options: A. Red B. Green C. Yellow D. Blue. Answer with one capital letter.",
     "C", _mcq_grader("C"),
-    subtitle="Three fire trucks responded to the blaze in downtown.",
 ))
 
 SAMPLES.append(_sample(
-    _next_id("av"), "multimodal_av_fusion", "AV-Fusion", ["cross_modal_disambiguation"], "mcq", V,
-    "Question: A musician is shown playing a guitar, but the audio is of a piano. What instrument is ACTUALLY being heard? Options: A. Guitar B. Piano C. Drums D. Violin. Answer with one capital letter.",
-    "B", _mcq_grader("B"),
-))
-
-# ═══════════════════════════════════════════════════════════════════════════════
-#  J. topic_plot_knowledge_acquisition — 主题/知识获取
-# ═══════════════════════════════════════════════════════════════════════════════
-
-SAMPLES.append(_sample(
-    _next_id("tk"), "topic_plot_knowledge_acquisition", "Knowledge", ["tutorial_topic_understanding"], "mcq", V,
-    "Question: A tutorial video demonstrates how to tie a bowline knot: make a loop, pass the end through, go around the standing line, and back through the loop. What knot is being taught? Options: A. Square knot B. Bowline knot C. Clove hitch D. Slip knot. Answer with one capital letter.",
-    "B", _mcq_grader("B"),
-))
-
-SAMPLES.append(_sample(
-    _next_id("tk"), "topic_plot_knowledge_acquisition", "Knowledge", ["plot_theme"], "mcq", V,
-    "Question: In a short film, a lonely old man finds a stray dog, cares for it, and gradually reconnects with his neighbors through the dog. What is the main theme? Options: A. Animal training B. Loneliness and connection C. Financial hardship D. Adventure. Answer with one capital letter.",
-    "B", _mcq_grader("B"),
-))
-
-SAMPLES.append(_sample(
-    _next_id("tk"), "topic_plot_knowledge_acquisition", "Knowledge", ["knowledge_acquisition"], "mcq", V,
-    "Question: A science video explains that photosynthesis converts CO₂ and H₂O into glucose and O₂ using sunlight. What is a product of photosynthesis? Options: A. Carbon dioxide B. Water C. Glucose D. Nitrogen. Answer with one capital letter.",
+    _next_id("ei"), "egocentric_intent_next_step", "Egocentric", ["higher_level_goal"], "mcq", V06,
+    "Question: Watch the video. The colors change in a specific pattern: red, yellow, green. "
+    "What real-world process does this pattern resemble? "
+    "Options: A. A rainbow B. A sunset C. A traffic light D. A painting. "
+    "Answer with one capital letter.",
     "C", _mcq_grader("C"),
 ))
 
 SAMPLES.append(_sample(
-    _next_id("tk"), "topic_plot_knowledge_acquisition", "Knowledge", ["adaptation_after_watching"], "mcq", V,
-    "Question: After watching a tutorial on CPR: 30 chest compressions then 2 rescue breaths, repeated. If someone collapses, what should you do first according to the video? Options: A. Give rescue breaths B. Call for help and start chest compressions C. Move them to a hospital D. Give water. Answer with one capital letter.",
+    _next_id("ei"), "egocentric_intent_next_step", "Egocentric", ["procedural_anticipation"], "mcq", V02,
+    "Question: Watch the video. The object moves right and then reverses. "
+    "Based on this pattern, if the video continued, what would the object likely do next? "
+    "Options: A. Stop permanently B. Move right again C. Move upward D. Disappear. "
+    "Answer with one capital letter.",
     "B", _mcq_grader("B"),
 ))
+
 
 # ═══════════════════════════════════════════════════════════════════════════════
-#  K. anti_shortcut_contrast — 反捷径/对比鲁棒性
+#  H. spatial_spatiotemporal_reasoning — spatial relations
+#  Videos: v08 (spatial layout), v11 (split screen), v15 (stacking)
+# ═══════════════════════════════════════════════════════════════════════════════
+
+V08 = _vpath("v08_spatial_layout.mp4")
+V11 = _vpath("v11_split_screen.mp4")
+V15 = _vpath("v15_stacking_overlap.mp4")
+
+SAMPLES.append(_sample(
+    _next_id("sp"), "spatial_spatiotemporal_reasoning", "Spatial", ["relative_position"], "mcq", V08,
+    "Question: Watch the video. Three colored objects are visible. "
+    "Which object is the LARGEST? "
+    "Options: A. Red B. Green C. Blue D. They are all the same size. "
+    "Answer with one capital letter.",
+    "A", _mcq_grader("A"),
+))
+
+SAMPLES.append(_sample(
+    _next_id("sp"), "spatial_spatiotemporal_reasoning", "Spatial", ["relative_position"], "mcq", V08,
+    "Question: In the video, which colored object is positioned highest on the screen? "
+    "Options: A. Red B. Green C. Blue D. Yellow. Answer with one capital letter.",
+    "B", _mcq_grader("B"),
+))
+
+SAMPLES.append(_sample(
+    _next_id("sp"), "spatial_spatiotemporal_reasoning", "Spatial", ["object_person_relation"], "mcq", V11,
+    "Question: The video screen is divided into a dark half and a bright half. "
+    "On which side is the red object? "
+    "Options: A. The dark (left) side B. The bright (right) side C. In the center "
+    "D. At the top. Answer with one capital letter.",
+    "A", _mcq_grader("A"),
+))
+
+SAMPLES.append(_sample(
+    _next_id("sp"), "spatial_spatiotemporal_reasoning", "Spatial", ["topological_change"], "mcq", V15,
+    "Question: The video shows three overlapping colored objects. "
+    "Which object appears on TOP of (in front of) the others? "
+    "Options: A. Blue B. Red C. Yellow D. Green. Answer with one capital letter.",
+    "C", _mcq_grader("C"),
+))
+
+SAMPLES.append(_sample(
+    _next_id("sp"), "spatial_spatiotemporal_reasoning", "Spatial", ["relative_position"], "mcq", V11,
+    "Question: In the video, what color is the object on the BRIGHT (right) side? "
+    "Options: A. Red B. Blue C. Green D. Yellow. Answer with one capital letter.",
+    "C", _mcq_grader("C"),
+))
+
+
+# ═══════════════════════════════════════════════════════════════════════════════
+#  I. multimodal_av_fusion — audio-visual
+#  (Synthetic videos have no audio, so we test visual-text fusion with subtitles)
+#  Videos: v11 (split screen), v14 (multiple events)
 # ═══════════════════════════════════════════════════════════════════════════════
 
 SAMPLES.append(_sample(
-    _next_id("as"), "anti_shortcut_contrast", "Robustness", ["reverse_order"], "mcq", V,
-    "Question: [REVERSED VIDEO] In this reversed video, a person is seen un-sitting (rising from a chair) and then un-entering a room (walking backward out). In the ORIGINAL (non-reversed) video, what did the person do first? Options: A. Sat down B. Entered the room C. Left the room D. Stood up. Answer with one capital letter.",
+    _next_id("av"), "multimodal_av_fusion", "AV-Fusion", ["cross_modal_disambiguation"], "mcq", V11,
+    "Question: The subtitle says 'The bright object is on the left side.' "
+    "But watch the video carefully — is this subtitle accurate? "
+    "Options: A. Yes, the bright side is on the left B. No, the bright side is on the right "
+    "C. There is no bright side D. Both sides are equally bright. Answer with one capital letter.",
+    "B", _mcq_grader("B"),
+    subtitle="The bright object is on the left side.",
+))
+
+SAMPLES.append(_sample(
+    _next_id("av"), "multimodal_av_fusion", "AV-Fusion", ["subtitle_audio_video_fusion"], "mcq", V08,
+    "Question: The subtitle claims 'There are two objects in the scene.' "
+    "Watch the video. Is this claim correct? "
+    "Options: A. Yes, there are exactly 2 B. No, there are 3 C. No, there are 4 "
+    "D. No, there is only 1. Answer with one capital letter.",
+    "B", _mcq_grader("B"),
+    subtitle="There are two objects in the scene.",
+))
+
+SAMPLES.append(_sample(
+    _next_id("av"), "multimodal_av_fusion", "AV-Fusion", ["cross_modal_disambiguation"], "mcq", V01,
+    "Question: The subtitle says 'The first object to appear is blue.' "
+    "Watch the video. Is this subtitle correct? "
+    "Options: A. Yes B. No, the first object is red C. No, the first object is green "
+    "D. No, the first object is yellow. Answer with one capital letter.",
+    "B", _mcq_grader("B"),
+    subtitle="The first object to appear is blue.",
+))
+
+SAMPLES.append(_sample(
+    _next_id("av"), "multimodal_av_fusion", "AV-Fusion", ["sound_source_alignment"], "mcq", V04,
+    "Question: The subtitle states 'Three objects appear in the video.' "
+    "Watch the actual video and count. How many objects appear? "
+    "Options: A. 3 B. 4 C. 5 D. 6. Answer with one capital letter.",
+    "C", _mcq_grader("C"),
+    subtitle="Three objects appear in the video.",
+))
+
+
+# ═══════════════════════════════════════════════════════════════════════════════
+#  J. topic_plot_knowledge_acquisition — pattern/knowledge extraction
+#  Videos: v06 (color change), v04 (objects appearing), v12 (sequential)
+# ═══════════════════════════════════════════════════════════════════════════════
+
+SAMPLES.append(_sample(
+    _next_id("tk"), "topic_plot_knowledge_acquisition", "Knowledge", ["tutorial_topic_understanding"], "mcq", V06,
+    "Question: Watch the video. It shows a sequence of color changes. "
+    "What pattern do you observe? "
+    "Options: A. Random color changes B. Red→Yellow→Green (warm to cool transition) "
+    "C. Blue→Green→Red D. All colors appear simultaneously. Answer with one capital letter.",
     "B", _mcq_grader("B"),
 ))
 
 SAMPLES.append(_sample(
-    _next_id("as"), "anti_shortcut_contrast", "Robustness", ["last_frame_only"], "mcq", V,
-    "Question: If you could only see the LAST FRAME of a video showing a completed jigsaw puzzle, could you determine the order in which pieces were placed? Options: A. Yes, from the last frame B. No, the last frame only shows the final state C. Yes, from color patterns D. Yes, from the edges. Answer with one capital letter.",
+    _next_id("tk"), "topic_plot_knowledge_acquisition", "Knowledge", ["knowledge_acquisition"], "mcq", V04,
+    "Question: Watch the video showing objects appearing one by one. "
+    "What is the spatial pattern of where they appear? "
+    "Options: A. They all appear at the same location B. They appear from left to right "
+    "C. They appear from top to bottom D. They appear randomly. Answer with one capital letter.",
     "B", _mcq_grader("B"),
 ))
 
 SAMPLES.append(_sample(
-    _next_id("as"), "anti_shortcut_contrast", "Robustness", ["sparse_frame_ablation"], "mcq", V,
-    "Question: A 10-second video is sampled at only 2 frames (first and last). The first frame shows an empty table. The last frame shows a vase on the table. Can you determine WHO placed the vase? Options: A. Yes B. No, sparse sampling loses this info C. Yes, from the vase style D. Yes, from the table. Answer with one capital letter.",
+    _next_id("tk"), "topic_plot_knowledge_acquisition", "Knowledge", ["plot_theme"], "mcq", V12,
+    "Question: Watch the video. Objects appear at different positions and times. "
+    "What spatial pattern do the object positions follow? "
+    "Options: A. All in center B. Moving from top-left toward bottom-right "
+    "C. All on the left side D. Alternating sides. Answer with one capital letter.",
     "B", _mcq_grader("B"),
 ))
 
 SAMPLES.append(_sample(
-    _next_id("as"), "anti_shortcut_contrast", "Robustness", ["subtitle_drop"], "mcq", V,
-    "Question: A video originally has subtitles saying 'The answer is Paris.' With subtitles removed, and only visual/audio cues of the Eiffel Tower visible, what city is shown? Options: A. London B. Paris C. Rome D. Berlin. Answer with one capital letter.",
+    _next_id("tk"), "topic_plot_knowledge_acquisition", "Knowledge", ["adaptation_after_watching"], "mcq", V09,
+    "Question: After watching this video with two objects moving at different speeds, "
+    "which row contains the faster-moving object? "
+    "Options: A. Top row B. Bottom row C. They are in the same row "
+    "D. There is only one object. Answer with one capital letter.",
+    "A", _mcq_grader("A"),
+))
+
+
+# ═══════════════════════════════════════════════════════════════════════════════
+#  K. anti_shortcut_contrast — robustness / anti-shortcut
+#  Videos: v13 (reverse motion), v07 (appears/disappears), v02 (right-left)
+# ═══════════════════════════════════════════════════════════════════════════════
+
+V13 = _vpath("v13_reverse_motion.mp4")
+
+SAMPLES.append(_sample(
+    _next_id("as"), "anti_shortcut_contrast", "Robustness", ["reverse_order"], "mcq", V13,
+    "Question: In this video, an object moves across the screen. "
+    "In which direction does it move? "
+    "Options: A. Left to right B. Right to left C. Top to bottom D. Bottom to top. "
+    "Answer with one capital letter.",
     "B", _mcq_grader("B"),
 ))
 
+SAMPLES.append(_sample(
+    _next_id("as"), "anti_shortcut_contrast", "Robustness", ["last_frame_only"], "mcq", V01,
+    "Question: If you could ONLY see the final frame of this video, could you determine "
+    "the ORDER in which the three objects appeared? "
+    "Options: A. Yes, from their positions B. No, the final frame shows all three "
+    "simultaneously C. Yes, from their colors D. Yes, from their sizes. "
+    "Answer with one capital letter.",
+    "B", _mcq_grader("B"),
+))
+
+SAMPLES.append(_sample(
+    _next_id("as"), "anti_shortcut_contrast", "Robustness", ["sparse_frame_ablation"], "mcq", V07,
+    "Question: This 10-second video has a blue object that appears and disappears. "
+    "If you only sampled 2 frames (at 0s and 10s), would you see the blue object? "
+    "Options: A. Yes, at both frames B. Yes, at one frame C. No, it's gone by 10s "
+    "and not yet at 0s D. Yes, it's always there. Answer with one capital letter.",
+    "C", _mcq_grader("C"),
+))
+
+SAMPLES.append(_sample(
+    _next_id("as"), "anti_shortcut_contrast", "Robustness", ["subtitle_drop"], "mcq", V02,
+    "Question: Watch the object's movement carefully. "
+    "Where does the object END UP at the end of the video? "
+    "Options: A. On the right side B. On the left side (where it started) "
+    "C. In the center D. Off-screen. Answer with one capital letter.",
+    "B", _mcq_grader("B"),
+))
+
+
+# ═══════════════════════════════════════════════════════════════════════════════
+#  Extra 2 samples to reach exactly 50
+# ═══════════════════════════════════════════════════════════════════════════════
+
+SAMPLES.append(_sample(
+    _next_id("tg"), "temporal_grounding", "Temporal", ["moment_retrieval"], "grounding", V12,
+    "Question: This is a 12-second video. When does the yellow object appear? "
+    "Answer with [start, end] in seconds.",
+    "[10.0, 12.0]", _span_grader("[10.0, 12.0]"),
+    evidence=Evidence(support_spans=[[10.0, 12.0]]),
+))
+
+SAMPLES.append(_sample(
+    _next_id("cr"), "causal_relation_reasoning", "Causal", ["causal_why_how"], "mcq", V09,
+    "Question: In this video, one object reaches the right side of the screen before the other. "
+    "Why does the red object arrive first? "
+    "Options: A. It started further right B. It moves faster C. The blue one stops "
+    "D. They arrive at the same time. Answer with one capital letter.",
+    "B", _mcq_grader("B"),
+))
 
 # ─────────────────────────────────────────────────────────────────────────────
-
-# ═══════════════════════════════════════════════════════════════════════════════
-#  Extra 4 samples to reach exactly 50
-# ═══════════════════════════════════════════════════════════════════════════════
-
-SAMPLES.append(_sample(
-    _next_id("tco"), "temporal_count_order", "Temporal", ["action_count"], "count", V,
-    "Question: In a workout video, the person does 12 push-ups, rests, then does 8 more push-ups. How many push-ups total? Answer with a number only.",
-    "20", _exact_grader("20"),
-))
-
-SAMPLES.append(_sample(
-    _next_id("lv"), "long_video_retrieval_memory", "Memory", ["needle_retrieval"], "mcq", V,
-    "Question: In a 45-minute nature documentary, the narrator mentions the name of a rare bird 'Kakapo' exactly once, around minute 32. What is the name of the rare bird? Options: A. Dodo B. Kakapo C. Kiwi D. Condor. Answer with one capital letter.",
-    "B", _mcq_grader("B"),
-))
-
-SAMPLES.append(_sample(
-    _next_id("fc"), "future_event_counterfactual", "Prediction", ["anticipation"], "mcq", V,
-    "Question: A stack of dominos is set up in a line. A person flicks the first domino. What will happen? Options: A. Only the first falls B. They all fall in sequence C. They all fall simultaneously D. Nothing happens. Answer with one capital letter.",
-    "B", _mcq_grader("B"),
-))
-
-SAMPLES.append(_sample(
-    _next_id("sp"), "spatial_spatiotemporal_reasoning", "Spatial", ["motion_in_space"], "mcq", V,
-    "Question: A drone flies north for 100m, turns east for 50m, then turns south for 100m. Relative to the start, where is the drone now? Options: A. 50m east B. 50m north C. 100m northeast D. Back at start. Answer with one capital letter.",
-    "A", _mcq_grader("A"),
-))
 
 
 def build_diagnostic(output: str = "data/diagnostic/diagnostic_eval.jsonl"):
     """Write diagnostic samples to JSONL."""
+    # Verify videos exist
+    video_dir = _VIDEO_BASE
+    if not video_dir.exists():
+        print(f"ERROR: Video directory {video_dir} does not exist.")
+        print("Run `python -m scripts.generate_diagnostic_videos` first.")
+        sys.exit(1)
+
+    video_count = len(list(video_dir.glob("*.mp4")))
+    if video_count < 15:
+        print(f"WARNING: Expected 15 videos, found {video_count}.")
+        print("Run `python -m scripts.generate_diagnostic_videos` to regenerate.")
+
     out_path = Path(output)
     out_path.parent.mkdir(parents=True, exist_ok=True)
     with open(out_path, "w", encoding="utf-8") as f:
@@ -473,9 +668,27 @@ def build_diagnostic(output: str = "data/diagnostic/diagnostic_eval.jsonl"):
     caps = Counter(s["extra_info"]["sampling_info"]["mix_bucket"] for s in SAMPLES)
     print(f"Total diagnostic samples: {len(SAMPLES)}")
     print(f"Output: {out_path}")
-    print("\nPer-capability breakdown:")
+    print(f"Videos: {video_count} files in {video_dir}/")
+    print(f"\nPer-capability breakdown:")
     for cap, cnt in sorted(caps.items()):
         print(f"  {cap}: {cnt}")
+
+    # Verify all video files referenced exist
+    missing = []
+    for s in SAMPLES:
+        for msg in s["messages"]:
+            for c in msg["content"]:
+                if c.get("type") == "video_url":
+                    url = c["video_url"]["url"]
+                    fpath = url.replace("file://", "")
+                    if not Path(fpath).exists():
+                        missing.append(fpath)
+    if missing:
+        print(f"\nWARNING: {len(missing)} referenced video files are missing!")
+        for m in missing[:5]:
+            print(f"  {m}")
+    else:
+        print(f"\nAll referenced video files exist.")
 
 
 if __name__ == "__main__":
